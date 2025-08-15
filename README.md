@@ -18,11 +18,13 @@ This is a simple console-based Tic-Tac-Toe game implemented in Python. The game 
 - Players take turns entering a position (1-9) to place their marker on the board:
 	- The board positions are numbered as follows:
 
-		1 | 2 | 3
-		---------
-		4 | 5 | 6
-		---------
-		7 | 8 | 9
+        ```
+         1 | 2 | 3
+        ---+---+---
+         4 | 5 | 6
+        ---+---+---
+         7 | 8 | 9
+        ```
 
 - Enter the number corresponding to your desired position when prompted.
 - The game will display the board after each move.
@@ -36,9 +38,9 @@ Choice (X/O): X
 Enter a your Position (1-9) : 5
  ------ X ----- X -----
 	|   |   |  
---|---|---|--
+  --|---|---|--
 	| X |   |  
---|---|---|--
+  --|---|---|--
 	|   |   |  
  ------ X ----- X -----
 ```
