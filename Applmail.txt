@@ -1,0 +1,19 @@
+Subject : Applicaiton for Playwright Automation role
+
+/
+Hi {},
+
+Good Day.
+I’m writing to express my strong interest in the Playwright Automation Engineer position. I bring over 3 years of experience in test automation, with a focus on Microsoft Dynamics 365 Business Central, where I’ve designed and implemented automation frameworks using Playwright, Page Scripting, and Selenium.
+
+At my current organization, I’ve been contributing to automation and performance testing initiatives that have enhanced testing efficiency and improved product reliability across multiple release cycles.
+
+My technical expertise includes:
+Playwright | Selenium | Page Scripting | Postman | Cucumber | Jenkins | Python | JavaScript | AL Code | Azure DevOps | API Automation
+
+I’m currently open to new opportunities where I can apply my skills and deliver high-impact solutions. I’ve attached my resume for your review. Please feel free to reach out if you'd like to connect—I’d be happy to discuss further.
+
+Looking forward to your response.
+
+Thanks & Regards,
+P Dhanush
