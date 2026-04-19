@@ -1,8 +1,15 @@
 import smtplib
-import getpass
 import os
+import time
 from email.mime.text import MIMEText
-import re
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
+
+# File paths
+cred = os.path.join(os.getcwd(), 'creds.txt')
+resume = os.path.join(os.getcwd(), 'P_Dhanush_Resume.pdf')
+
 
 def start_smtp_connection():
     smtp_obj = smtplib.SMTP('smtp.gmail.com', 587)
@@ -10,84 +17,92 @@ def start_smtp_connection():
     smtp_obj.starttls()
     return smtp_obj
 
+
 def give_email_credentials():
-    email = getpass.getpass(prompt='Enter your email: ')
-    generated_pwd = getpass.getpass(prompt='Enter your app password: ')
+    with open(cred, 'r') as f:
+        email = f.readline().strip().strip('"')
+        generated_pwd = f.readline().strip().strip('"')
     return email, generated_pwd
 
+
 def get_file_contents(filepath):
-    with open(filepath, 'r', encoding="utf-8") as file:  # ensure file read as utf-8
+    with open(filepath, 'r', encoding="utf-8") as file:
         lines = file.read().splitlines()
         subj_line = lines[0]
         content_data = "\n".join(lines[3:])
     return subj_line, content_data
 
-def send_email(smtp_obj, msg):
-    smtp_obj.sendmail(msg['From'], msg['To'], msg.as_string())
 
 def convert_email_content(from_email, to_email, content_data, subj_line):
-    # Prepare dynamic body
-    number_pattern = re.compile(r'[^\d]+')
-    text = 'pokalarajesh1414@gmail.com'
-    recipient_name = re.findall(number_pattern,text)[0].capitalize()  # use part before '@' as name
-    content = content_data.format(recipient_name)  # use part before '@' as name
-
-    msg = MIMEText(content, "plain", "utf-8")
+    msg = MIMEMultipart()
     msg['From'] = from_email
     msg['To'] = to_email
-    # ✅ Build MIMEText object with headers
-    msg['Subject'] = subj_line.split(': ', 1)[1]  # safer split
+    msg['Subject'] = subj_line.split(': ', 1)[1]
+
+    # Email body
+    msg.attach(MIMEText(content_data, "plain", "utf-8"))
+
+    # Attach resume
+    try:
+        with open(resume, 'rb') as attachment:
+            part = MIMEBase('application', 'octet-stream')
+            part.set_payload(attachment.read())
+
+        encoders.encode_base64(part)
+        part.add_header(
+            'Content-Disposition',
+            f'attachment; filename={os.path.basename(resume)}'
+        )
+        msg.attach(part)
+
+    except FileNotFoundError:
+        print(f"⚠️ Resume not found at: {resume}")
 
     return msg
 
 
 if __name__ == "__main__":
 
-    conection_retries,login_retries = 0, 0
-    connection_waiting = True
-    login_waiting = True
-    login_failed = False
     current_directory = os.getcwd()
     text_file_path = os.path.join(current_directory, 'Applmail.txt')
-    to_mail = 'pokalarajesh1414@gmail.com'
 
+    # to_mail = [
+    #     'harpreet.kaur1@programming.com',
+    #     'careers.allies22@gmail.com',
+    #     'ajithkaran.n@hirexera.in',
+    #     'viknesh.sr@ust.com',
+    #     'mahima.rawat@tdnewton.com'
+    # ]
+    to_mail = ['dhanushpoloJU@gmail.com','bendhana521@gmail.com']
+
+    # Read email content
     subj_line, content_data = get_file_contents(text_file_path)
-    print('Contents Successfully Read...!!!')
+    print('✅ Email content loaded...')
 
-    # SMTP connection
-    while connection_waiting:
-        try:
-            smtp_obj = start_smtp_connection()
-            print('Connection Established....!!!')
-        except smtplib.SMTPException as e:
-            print('Error establishing SMTP connection:', e)
-            conection_retries += 1
-            if conection_retries > 2:
-                print("Max retries exceeded. Exiting...")
-                connection_waiting = False
-        else:
-            connection_waiting = False
+    try:
+        # Start SMTP session ONCE
+        smtp_obj = start_smtp_connection()
+        print('✅ SMTP connection established')
 
-    while login_waiting:
-        try:
-            email, generated_pwd = give_email_credentials()
-            smtp_obj.login(email, generated_pwd)
-            print('Login Successful....!!!')
-        except smtplib.SMTPAuthenticationError as e:
-            print('Error logging in:', e)
-            login_retries += 1
-            if login_retries > 2:
-                print("Max retries exceeded. Exiting...")
-                login_failed = True
-                login_waiting = False
-        else:
-            login_waiting = False
+        email, generated_pwd = give_email_credentials()
+        smtp_obj.login(email, generated_pwd)
+        print('✅ Login successful')
 
-    if not login_failed:
-        msg = convert_email_content(email, to_mail, content_data, subj_line)
+        # Send emails
+        for mail in to_mail:
+            try:
+                msg = convert_email_content(email, mail, content_data, subj_line)
 
-        # ✅ Send as string
-        smtp_obj.sendmail(msg['From'], msg['To'], msg.as_string())
+                smtp_obj.sendmail(email, mail, msg.as_string())
+                print(f"📤 Email sent to {mail}")
+
+                time.sleep(2)  # Prevent Gmail rate limiting
+
+            except Exception as e:
+                print(f"❌ Failed for {mail}: {e}")
+
         smtp_obj.quit()
-        print("Email sent successfully!")
-    
+        print("✅ All emails processed successfully")
+
+    except Exception as e:
+        print(f"🚨 Fatal error: {e}")
